@@ -32,6 +32,15 @@ resource function post addProgramme(@http:Payload Programme programme) returns s
 resource function get getAllProgrammes() returns table<Programme> key(programmeCode) {
         return programmes;
     }
+ 
+ resource function get getProgrammeByCode(string programmeCode) returns programme|string {
+        foreach programme programme in programmeTable {
+            if (programmeTable.programmeCode === programmeCode) {
+                return programme;
+            }
+        }
+        return programmeCode + " is invalid";
+    }
   resource function put updateProgrammeDetails(@http:Payload Lecturer lecturer) returns string {
         io:println(programme);
         error? err = programmeTable.put(programme);
@@ -40,4 +49,5 @@ resource function get getAllProgrammes() returns table<Programme> key(programmeC
         }
         return string `${programme.programmeCode} saved successfully`;
     }
+
 }
