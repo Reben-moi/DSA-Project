@@ -1,5 +1,5 @@
-import ballerina/http;
 import ballerina/io;
+import ballerina/http;
 import ballerina/time;
  
 type Programme record {
@@ -85,8 +85,7 @@ match option {
             check deleteProgrammeByCode(programmeClient, programmeCode);
         }
         "6" => {
-            string programmeCode = io:readln("Enter programme code: ");
-            check getProgrammeDueForReview(programmeClient, programmeCode);
+             check getProgrammesDueForReview(programmeClient);
         }
         "7" => {
             string faculty = io:readln("Enter Faculty: ");
@@ -98,7 +97,6 @@ match option {
         }    
     }
 }
-
 
 
 public function addProgramme(http:Client http, Programme programme) returns error? {
@@ -122,6 +120,12 @@ public function getAllProgrammes(http:Client http) returns error? {
         }
     }
 }
+public function updateProgramme(http:Client http, Programme programme) returns error? {
+    if (http is http:Client) {
+        string message = check http->/updateProgrammeDetails.put(programme);
+        io:println(message);
+    }
+ }
     public function getProgrammeByCode(http:Client http, string programmeCode) returns error? {
     if (http is http:Client) {
         Programme|string programme = check http->/getProgrammeByCode.get(programmeCode = programmeCode);
@@ -139,6 +143,32 @@ public function getAllProgrammes(http:Client http) returns error? {
     }
 }
 
+ public function deleteProgrammeByCode(http:Client http, string programmeCode) returns error? {
+    if (http is http:Client) {
+        string message = check http->/deleteProgrammeByCode.get(programmeCode = programmeCode);
+        io:println(message);
+    }
+}
+
+public function getProgrammesDueForReview(http:Client http) returns error? {
+    table<Programme> programmes = check http->get("/getProgrammesDueForReview");
+    
+    if (programmes.isEmpty) {
+        io:println("No programmes due for review.");
+    } else {
+        foreach Programme programme in programmes {
+            io:println("--------------------------");
+            io:println("Programme Code: ", programme.programmeCode);
+            io:println("Programme Title: ", programme.title);
+            io:println("NQF Level: ", programme.nqfLevel);
+            io:println("Programme Faculty: ", programme.faculty);
+            io:println("Department Name: ", programme.department);
+            io:println("Registration Date: ", programme.registrationDate);
+        }
+    }
+}
+
+
 public function getAllProgrammesInFaculty(http:Client http, string faculty) returns error? {
     if (http is http:Client) {
         table<Programme> programmes = check http->/getAllProgrammesInFaculty.get({faculty});
@@ -152,16 +182,4 @@ public function getAllProgrammesInFaculty(http:Client http, string faculty) retu
             io:println("Registration Date: ", programme.registrationDate);
         }
     }
-public function updateProgramme(http:Client http, Programme programme) returns error? {
-    if (http is http:Client) {
-        string message = check http->/updateProgrammeDetails.put(programme);
-        io:println(message);
-    }
- }
- public function deleteProgrammeByCode(http:Client http, string programmeCode) returns error? {
-    if (http is http:Client) {
-        string message = check http->/deleteProgrammeByCode.get(programmeCode = programmeCode);
-        io:println(message);
-    }
-}
 }
