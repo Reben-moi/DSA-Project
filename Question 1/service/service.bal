@@ -3,7 +3,7 @@ import ballerina/io;
 import ballerina/time;
  
 type Programme record {
-   string programmeCode;
+   readonly string programmeCode;
     string nqfLevel;
     string faculty;
     string department;
@@ -30,7 +30,7 @@ resource function post addProgramme(@http:Payload Programme programme) returns s
         return string `${programme.programmeCode} saved successfully`;
     }
 resource function get getAllProgrammes() returns table<Programme> key(programmeCode) {
-        return programmes;
+        return programmeTable;
     }
  
  resource function get getProgrammeByCode(string programmeCode) returns Programme|error {
