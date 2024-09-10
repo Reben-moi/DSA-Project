@@ -22,12 +22,12 @@ public function main() returns error? {
     http:Client programmeClient = check new ("localhost:8080/programmes");
 
     io:println("1. Add Programme");
-    io:println("2. View All Programmes");
-    io:println("3. View Programme By Programme Code");
-    io:println("4. View All Programmes From Faculty");
-    io:println("5. Update Programme");
-    io:println("6. Delete Programme By Code");
-    io:println("7. View Programme Due For Review");
+    io:println("2. Retrieve a list of All Programme within Programme Development Unit");
+    io:println("3. Update an exist if Programme By Programme Code");
+    io:println("4. View Specific Programme by programme code");
+    io:println("5. Delete Programme By Programme Code");
+    io:println("6. Retrieve all Programmme Due For Review");
+    io:println("7. Retrieve Programmes From Same Faculty");
     string option = io:readln("Choose an option: ");
 
 match option {
@@ -54,16 +54,9 @@ match option {
         }
         "2" => {
             check getAllProgrammes(programmeClient);
-        }
+        }        
+        
         "3" => {
-            string programmeCode = io:readln("Enter Programme Code: ");
-            check getProgrammeByCode(programmeClient, programmeCode);
-        }
-        "4" => {
-            string faculty = io:readln("Enter Faculty: ");
-            check getAllProgrammesInFaculty(programmeClient, faculty);
-        }
-        "5" => {
              Programme programme = {};
             programme.programmeCode = io:readln("Enter Programme Code: ");   
             programme.title = io:readln("Enter Programme Title: ");          
@@ -83,13 +76,21 @@ match option {
 
             check updateProgramme(programmeClient, programme); 
         }
-        "6" => {
+        "4" => {
+            string programmeCode = io:readln("Enter Programme Code: ");
+            check getProgrammeByCode(programmeClient, programmeCode);
+        }
+        "5" => {
              string programmeCode = io:readln("Enter programme code: ");
             check deleteProgrammeByCode(programmeClient, programmeCode);
         }
-        "7" => {
+        "6" => {
             string programmeCode = io:readln("Enter programme code: ");
             check getProgrammeDueForReview(programmeClient, programmeCode);
+        }
+        "7" => {
+            string faculty = io:readln("Enter Faculty: ");
+            check getAllProgrammesInFaculty(programmeClient, faculty);
         }
        _ => {
             io:println("Invalid Key");
