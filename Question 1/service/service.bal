@@ -80,7 +80,7 @@ resource function delete deleteProgrammeByCode(string programmeCode) returns str
     }
 
 
-resource function get getProgrammeByFaculty(string faculty) returns Programme[]|error {
+resource function get getProgrammeBySameFaculty(string faculty) returns Programme[]|error {
     Programme[] facultyProgrammes = [];
 
     foreach Programme programme in programmeTable {
