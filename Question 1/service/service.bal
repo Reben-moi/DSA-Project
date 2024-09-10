@@ -78,24 +78,7 @@ resource function delete deleteProgrammeByCode(string programmeCode) returns str
         programmeTable = <table<Programme> key(programmeCode)>tempProgrammeTable;
         return programmeCode + " successfully deleted";
     }
-    
-function isDueForReview(time:Date registrationDate) returns boolean {
-    time:Date currentDate = time:currentDate();
-    int diffYears = time:yearsBetween(registrationDate, currentDate);
-    return diffYears >= 4;
-}
 
-resource function get getProgrammesDueForReview() returns Programme[] {
-    Programme[] dueForReviewProgrammes = [];
-
-    foreach Programme programme in programmeTable {
-        if (isDueForReview(programme.registrationDate)) {
-            dueForReviewProgrammes.push(programme);
-        }
-    }
-
-    return dueForReviewProgrammes;
-}
 
 resource function get getProgrammeByFaculty(string faculty) returns Programme[]|error {
     Programme[] facultyProgrammes = [];
