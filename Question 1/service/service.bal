@@ -3,7 +3,7 @@ import ballerina/io;
 import ballerina/time;
  
 type Programme record {
-   readonly string programmeCode;
+   string programmeCode;
     string nqfLevel;
     string faculty;
     string department;
@@ -33,15 +33,15 @@ resource function get getAllProgrammes() returns table<Programme> key(programmeC
         return programmes;
     }
  
- resource function get getProgrammeByCode(string programmeCode) returns programme|string {
-        foreach programme programme in programmeTable {
-            if (programmeTable.programmeCode === programmeCode) {
+ resource function get getProgrammeByCode(string programmeCode) returns Programme|error {
+        foreach Programme programme in programmeTable {
+            if (programme.programmeCode === programmeCode) {
                 return programme;
             }
         }
-        return programmeCode + " is invalid";
+       return error("Programme not found with code: " + programmeCode);
     }
-  resource function put updateProgrammeDetails(@http:Payload Lecturer lecturer) returns string {
+  resource function put updateProgrammeDetails(@http:Payload Programme programme) returns string {
         io:println(programme);
         error? err = programmeTable.put(programme);
         if (err is error) {

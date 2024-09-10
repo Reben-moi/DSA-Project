@@ -54,7 +54,7 @@ match option {
         }
         "3" => {
             string programmeCode = io:readln("Enter Programme Code: ");
-            check getProgrammeByCode(lecturerClient, staffNum);
+            check getProgrammeByCode(programmeClient, programmeCode);
         }
     }
 
