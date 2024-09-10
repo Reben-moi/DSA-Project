@@ -29,10 +29,15 @@ resource function post addProgramme(@http:Payload Programme programme) returns s
         }
         return string `${programme.programmeCode} saved successfully`;
     }
-resource function get getAllProgrammes() returns table<Programme> key(programmeCode) {
-        return programmeTable;
+resource function get getAllProgrammes() returns Programme[] {
+    Programme[] allProgrammes = [];
+
+    foreach Programme programme in programmeTable {
+        allProgrammes.push(programme);
     }
- 
+
+    return allProgrammes;
+}
  resource function get getProgrammeByCode(string programmeCode) returns Programme|error {
         foreach Programme programme in programmeTable {
             if (programme.programmeCode === programmeCode) {
