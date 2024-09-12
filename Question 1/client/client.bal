@@ -1,8 +1,8 @@
 import ballerina/io;
 import ballerina/http;
 
-type Programme record {
-   readonly string programmeCode;
+public type Programme record {
+    readonly string programmeCode;
     string nqfLevel;
     string faculty;
     string department;
@@ -12,7 +12,8 @@ type Programme record {
     Course[] courses;
 };
 
-type Course record {
+
+public type Course record {
     string courseCode;
     string courseName;
     string nqfLevel;
@@ -184,3 +185,4 @@ public function getAllProgrammesInFaculty(http:Client http, string faculty) retu
         }
     }
 }
+
