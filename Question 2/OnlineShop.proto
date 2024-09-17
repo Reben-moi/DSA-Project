@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package shopping;
+
+// import "google/protobuf/wrappers.proto";
+// import "google/protobuf/empty.proto";
+
+// Service definition
+service ShoppingSystem {
+  // Admin operations
+  rpc AddProduct (AddProductRequest) returns (Responds);
+  rpc UpdateProduct (UpdateProductRequest) returns (Responds);
+  rpc RemoveProduct (RemoveProductRequest) returns (Responds);
+  rpc ListOrders (ListOrdersRequest) returns (Responds);
+
+  // Customer operations
+  rpc ListAvailableProducts (ListAvailableProductsRequest) returns (Responds);
+  rpc SearchProduct (SearchProductRequest) returns (Responds);
+  rpc AddToCart (AddToCartRequest) returns (Responds);
+  rpc PlaceOrder (PlaceOrderRequest) returns (Responds);
+
+  // User management
+  rpc CreateUsers (stream CreateUserRequest) returns (Responds);
+}
+
+// Request and response messages
+message AddProductRequest {
+  string name = 1;
+  string description = 2;
+  float price = 3;
+  int32 stock_quantity = 4;
+  string sku = 5;
+  string status = 6; // "available" or "out_of_stock"
+}
+
+message UpdateProductRequest {
+  string sku = 1;
+  string name = 2;
+  string description = 3;
+  float price = 4;
+  int32 stock_quantity = 5;
+  string status = 6; // "available" or "out_of_stock"
+}
+
+message RemoveProductRequest {
+  string sku = 1;
+}
+
+message ListOrdersRequest {}
+
+message ListAvailableProductsRequest {}
+
+message SearchProductRequest {
+  string sku = 1;
+}
+
+message AddToCartRequest {
+  string user_id = 1;
+  string sku = 2;
+}
+
+message PlaceOrderRequest {
+  string user_id = 1;
+}
+
+message CreateUserRequest {
+  string user_id = 1;
+  string user_type = 2; // "customer" or "admin"
+  string name = 3;
+}
+
+
+message Product {
+  string name = 1;
+  string description = 2;
+  float price = 3;
+  int32 stock_quantity = 4;
+  string sku = 5;
+  string status = 6;
+}
+
+message Order {
+  string order_id = 1;
+  string user_id = 2;
+  repeated Product products = 3;
+}
+
+message Responds {
+  string message = 1;
+}
