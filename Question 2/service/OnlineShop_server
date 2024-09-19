@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package shopping;
+
+type ProductRecord {
+    string name;
+    string description;
+    float price;
+    int stock_quantity;
+    string sku;
+    string status;
+}
+
+type OrderRecord {
+    string order_id;
+    string user_id;
+    ProductRecord[] products;
+}
+
+// In-memory storage
+map<string, ProductRecord> products = {};
+map<string, OrderRecord> orders = {};
+map<string, string> users = {}; // Map user_id to user_type
+
+function main() {
+    // Create a gRPC server
+    grpc:Server server = new grpc:Server();
+
+    // Register the service implementation
+    server.addService(new ShoppingSystemImpl());
+
+    // Start the server
+    http:Service httpService = http:createService(server, 8080);
+    httpService.start();
+}
+
+service ShoppingSystem {
+    remote function AddProduct(AddProductRequest request) returns (Responds) {
+        // Validate input
+        if (request.name is empty || request.description is empty || request.price <= 0 || request.sku is empty) {
+            return error("Invalid product data");
+        }
+
+        // Check if product already exists
+        if (products.containsKey(request.sku)) {
+            return error("Product already exists");
+        }
+
+        // Add product to in-memory storage
+        ProductRecord product = {
+            name: request.name,
+            description: request.description,
+            price: request.price,
+            stock_quantity: request.stock_quantity,
+            sku: request.sku,
+            status: request.status
+        };
+        products[request.sku] = product;
+
+        return { message: "Product added successfully" };
+        
+        service ShoppingSystem {
+  // Admin operations
+  rpc AddProduct (AddProductRequest) returns (Responds);
+  rpc UpdateProduct (UpdateProductRequest) returns (Responds);
+  rpc RemoveProduct (RemoveProductRequest) returns (Responds);
+  rpc ListOrders (ListOrdersRequest) returns (Responds);
+
+  // Customer operations
+  rpc ListAvailableProducts (ListAvailableProductsRequest) returns (Responds);
+  rpc SearchProduct (SearchProductRequest) returns (Responds);
+  rpc AddToCart (AddToCartRequest) returns (Responds);
+  rpc PlaceOrder (PlaceOrderRequest) returns (Responds);
+
+  // User management
+  rpc CreateUsers (stream CreateUserRequest) returns (Responds);
+}
+    }
+}
