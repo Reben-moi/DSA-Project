@@ -12,8 +12,8 @@ User[] users = [
     { user_id: "1", user_name: "Reben", user_password: "dsa24", user_type: "admin" },
     { user_id: "2", user_name: "Fillemon", user_password: "passcode", user_type: "customer" },
     { user_id: "3", user_name: "Matti", user_password: "password789", user_type: "customer" },
-    { user_id: "4", user_name: "Steven", user_password: "adminpass", user_type: "admin" }
-    { user_id: "5", user_name: "Jafet", user_password: "sabufa77", user_type: "customer" }
+    { user_id: "4", user_name: "Steven", user_password: "adminpass", user_type: "admin" },
+    { user_id: "5", user_name: "Jafet", user_password: "sabufa77", user_type: "customer" },
     { user_id: "6", user_name: "Paules", user_password: "paul33", user_type: "customer" }
 ];
 
