@@ -56,7 +56,6 @@ service ShoppingSystem {
             status: request.status
         };
         products[request.sku] = product;
-
         return { message: "Product added successfully" };
         
         service ShoppingSystem {
