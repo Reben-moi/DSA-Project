@@ -1,146 +1,60 @@
-<<<<<<< HEAD
-import ballerina/io;
-=======
 import ballerina/grpc;
->>>>>>> 7f6f1d99d312d75fb3ea16439a86d781a2110000
 
-<<<<<<< HEAD
-public function main() {
-    io:println("Hello, World!");
-}
+// Create a gRPC listener on port 9090. This will listen for incoming gRPC requests.
+listener grpc:Listener ep = new (9090);
 
-=======
-listener grpc:Listener shoppingEP = new (9090);
+// Define a record to represent a product entry with an SKU (Stock Keeping Unit) as the unique identifier.
+type ProductEntry record {|
+    readonly string sku; // SKU is read-only to ensure immutability.
+    Product product;     // The product itself contains details like name, price, description, etc.
+|};
 
-@grpc:ServiceDescriptor {
-    descriptor: ROOT_DESCRIPTOR_SHOPPING,
-    descMap: getDescriptorMapShopping()
-}
-service "shoppingManagement" on shoppingEP {
-    private map<Product> products = {};
-    private map<User> users = {};
-    private map<string, Cart> carts = {}; // Mapping userID to their cart
-    private map<string, Order> orders = {}; // Mapping orderID to the order
+// Define a record to represent a cart entry with a user ID as the unique identifier.
+type CartEntry record {|
+    readonly string user_id; // Unique identifier for the user.
+    Cart cart;               // Cart object containing items added by the user.
+|};
 
-    remote function add_product(Product request) returns string|error {
-        string sku = request.SKU;
-        if (self.products.hasKey(sku)) {
-            return error("Product with SKU ${sku} already exists");
-        } else {
-            self.products[sku] = request;
-            return sku; // Return the SKU of the added product
-        }
+// Define a record to represent a user entry with an ID as the unique identifier.
+type UserEntry record {|
+    readonly string id;  // Unique identifier for the user.
+    User user;           // User object containing user details such as name, role, etc.
+|};
+
+// Create tables to store product, cart, and user entries, with their respective unique keys.
+// Each table is essentially an in-memory database for our online shopping system.
+table<ProductEntry> key(sku) products_table = table [];  // Table to store products, keyed by SKU.
+table<CartEntry> key(user_id) carts_table = table [];    // Table to store carts, keyed by user ID.
+table<UserEntry> key(id) users_table = table [];         // Table to store users, keyed by user ID.
+
+@grpc:Descriptor {value: ONLINE_SHOPPING_DESC}
+// Define the gRPC service named "onlineShopping" that listens for gRPC calls.
+service "onlineShopping" on ep {
+
+    // gRPC method to add a new product to the products_table.
+    remote function addProduct(Product product) returns ProductResponse|error {
+        // Add the product to the table using its SKU as the key.
+        products_table.add({sku: product.sku, product: product});
+        // Return a response indicating that the product was successfully added.
+        return {message: "Product added successfully", product: product};
     }
 
-    remote function create_users(stream<User, error?> userStream) returns Responds|error {
-        foreach var user in userStream {
-            string userID = user.userID;
-            if (self.users.hasKey(userID)) {
-                return error("User with ID ${userID} already exists");
-            } else {
-                self.users[userID] = user;
-            }
-        }
-        return {message: "Users created successfully"};
+    // gRPC method to update an existing product in the products_table.
+    remote function updateProduct(Product product) returns ProductResponse|error {
+        // Update the product entry in the table by replacing the old entry with the new one.
+        products_table.put({sku: product.sku, product: product});
+        // Return a response indicating the product was successfully updated.
+        return {message: "Product updated successfully", product: product};
     }
 
-    remote function update_product(Product request) returns Responds|error {
-        string sku = request.SKU;
-        if (self.products.hasKey(sku)) {
-            self.products[sku] = request;
-            return {message: "Product updated successfully"};
-        } else {
-            return error("No product with SKU ${sku} exists");
+    // gRPC method to remove a product from the products_table by its SKU.
+    remote function removeProduct(string sku) returns ProductResponse|error {
+        // Try to remove the product from the table using its SKU.
+        ProductEntry? entry = products_table.remove(sku);
+        // If the product was found and removed, return a success message.
+        if entry is ProductEntry {
+            return {message: "Product removed successfully", product: entry.product};
         }
+        // If the product wasn't found, return an error.
+        return error("Product not found");
     }
-
-    remote function remove_product(string sku) returns map<Product>|error {
-        if (self.products.hasKey(sku)) {
-            self.products.remove(sku);
-            return self.products;
-        } else {
-            return error("No product with SKU ${sku} exists");
-        }
-    }
-
-    remote function list_available_products() returns map<Product>|error {
-        map<Product> availableProducts = self.products.filter(p => p.status == "available");
-        return availableProducts;
-    }
-
-    remote function search_product(string sku) returns Product?|error {
-        Product? product = self.products.get(sku);
-        if (product != null && product.status == "available") {
-            return product;
-        } else {
-            return error("Product with SKU ${sku} is not available");
-        }
-    }
-
-    remote function add_to_cart(string userID, string sku) returns Responds|error {
-        User? user = self.users.get(userID);
-        Product? product = self.products.get(sku);
-
-        if (user == null) {
-            return error("User with ID ${userID} does not exist");
-        }
-        if (product == null || product.status != "available") {
-            return error("Product with SKU ${sku} is not available");
-        }
-
-        Cart? cart = self.carts.get(userID);
-        if (cart == null) {
-            cart = new Cart();
-            self.carts[userID] = cart;
-        }
-        cart.products.add(sku);
-        return {message: "Product added to cart successfully"};
-    }
-
-    remote function place_order(string userID) returns Order|error {
-        Cart? cart = self.carts.get(userID);
-        if (cart == null || cart.products.isEmpty()) {
-            return error("No items in cart for user ${userID}");
-        }
-
-        Order newOrder = new Order();
-        newOrder.userID = userID;
-        newOrder.products = cart.products;
-
-        // Create an order ID and store the order
-        string orderID = uuid(); // Generating a unique order ID
-        self.orders[orderID] = newOrder;
-
-        // Clear the user's cart
-        self.carts.remove(userID);
-
-        return newOrder;
-    }
-}
-
-type Product record {
-    string name;
-    string description;
-    float price;
-    int stockQuantity;
-    string SKU;
-    string status; // "available" or "out of stock"
-};
-
-type User record {
-    string userID;
-    string firstName;
-    string lastName;
-    string role; // "customer" or "admin"
-};
-
-type Cart record {
-    string[] products = [];
-};
-
-type Order record {
-    string userID;
-    string[] products;
-};
-
->>>>>>> 7f6f1d99d312d75fb3ea16439a86d781a2110000
