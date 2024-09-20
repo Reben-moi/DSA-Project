@@ -1,78 +1,101 @@
-syntax = "proto3";
+import ballerina/grpc;
+import ballerina/log;
 
-package shopping;
-
-type ProductRecord {
+// Define in-memory data structures
+type Product record {
     string name;
     string description;
     float price;
-    int stock_quantity;
+    int stockQuantity;
     string sku;
-    string status;
-}
+    string status; // "available" or "out of stock"
+};
 
-type OrderRecord {
-    string order_id;
-    string user_id;
-    ProductRecord[] products;
-}
+type User record {
+    int id;
+    string name;
+    string role; // "customer" or "admin"
+};
+
+type CartItem record {
+    int userId;
+    string sku;
+    int quantity;
+};
 
 // In-memory storage
-map<string, ProductRecord> products = {};
-map<string, OrderRecord> orders = {};
-map<string, string> users = {}; // Map user_id to user_type
+map<Product> productInventory = {};
+map<User> users = {};
+map<int, CartItem[]> carts = {};
+int orderCount = 0;
 
-function main() {
-    // Create a gRPC server
-    grpc:Server server = new grpc:Server();
+service "ShoppingService" on new grpc:Listener(9090) {
 
-    // Register the service implementation
-    server.addService(new ShoppingSystemImpl());
+    // Admin operations
+    resource function AddProduct(grpc:Caller caller, Product product) returns error? {
+        productInventory[product.sku] = product;
+        check caller->send({message: "Product added successfully"});
+    }
 
-    // Start the server
-    http:Service httpService = http:createService(server, 8080);
-    httpService.start();
-}
-
-service ShoppingSystem {
-    remote function AddProduct(AddProductRequest request) returns (Responds) {
-        // Validate input
-        if (request.name is empty || request.description is empty || request.price <= 0 || request.sku is empty) {
-            return error("Invalid product data");
+    resource function CreateUsers(stream<User, grpc:Error?> userStream, grpc:Caller caller) returns error? {
+        User? user = check userStream->next();
+        while user is User {
+            users[user.id] = user;
+            user = check userStream->next();
         }
+        check caller->send({message: "All users added"});
+    }
 
-        // Check if product already exists
-        if (products.containsKey(request.sku)) {
-            return error("Product already exists");
+    resource function UpdateProduct(grpc:Caller caller, UpdateProductRequest req) returns error? {
+        if productInventory.hasKey(req.sku) {
+            productInventory[req.sku] = req.updated_product;
+            check caller->send({message: "Product updated"});
+        } else {
+            check caller->send({message: "Product not found"});
         }
+    }
 
-        // Add product to in-memory storage
-        ProductRecord product = {
-            name: request.name,
-            description: request.description,
-            price: request.price,
-            stock_quantity: request.stock_quantity,
-            sku: request.sku,
-            status: request.status
-        };
-        products[request.sku] = product;
-        return { message: "Product added successfully" };
-        
-        service ShoppingSystem {
-  // Admin operations
-  rpc AddProduct (AddProductRequest) returns (Responds);
-  rpc UpdateProduct (UpdateProductRequest) returns (Responds);
-  rpc RemoveProduct (RemoveProductRequest) returns (Responds);
-  rpc ListOrders (ListOrdersRequest) returns (Responds);
+    resource function RemoveProduct(grpc:Caller caller, ProductSKU sku) returns error? {
+        productInventory.remove(sku.sku);
+        check caller->send({
+            products: from var [_, product] in productInventory.entries()
+                      select product
+        });
+    }
 
-  // Customer operations
-  rpc ListAvailableProducts (ListAvailableProductsRequest) returns (Responds);
-  rpc SearchProduct (SearchProductRequest) returns (Responds);
-  rpc AddToCart (AddToCartRequest) returns (Responds);
-  rpc PlaceOrder (PlaceOrderRequest) returns (Responds);
+    resource function ListAvailableProducts(grpc:Caller caller, Empty empty) returns error? {
+        check caller->send({
+            products: from var [_, product] in productInventory.entries()
+                      where product.status == "available"
+                      select product
+        });
+    }
 
-  // User management
-  rpc CreateUsers (stream CreateUserRequest) returns (Responds);
-}
+    resource function SearchProduct(grpc:Caller caller, ProductSKU sku) returns error? {
+        Product? product = productInventory[sku.sku];
+        if product is Product {
+            check caller->send({message: "Product found", product: product});
+        } else {
+            check caller->send({message: "Product not available"});
+        }
+    }
+
+    // Customer operations
+    resource function AddToCart(grpc:Caller caller, AddToCartRequest request) returns error? {
+        CartItem[] userCart = carts.get(request.user_id, []);
+        userCart.push({userId: request.user_id, sku: request.product_sku, quantity: 1});
+        carts[request.user_id] = userCart;
+        check caller->send({message: "Product added to cart"});
+    }
+
+    resource function PlaceOrder(grpc:Caller caller, UserID userId) returns error? {
+        CartItem[]? userCart = carts[userId.id];
+        if userCart is CartItem[] && userCart.length() > 0 {
+            carts.remove(userId.id);
+            orderCount += 1;
+            check caller->send({message: "Order placed successfully"});
+        } else {
+            check caller->send({message: "No items in cart"});
+        }
     }
 }
