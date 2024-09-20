@@ -58,3 +58,55 @@ service "onlineShopping" on ep {
         // If the product wasn't found, return an error.
         return error("Product not found");
     }
+// gRPC method to search for a product in the products_table by its SKU.
+    remote function searchProduct(string sku) returns ProductResponse|error {
+        // Retrieve the product entry from the table using the SKU.
+        ProductEntry? entry = products_table[sku];
+        // If the product was found, return a success message along with the product details.
+        if entry is ProductEntry {
+            return {message: "Product found successfully", product: entry.product};
+        }
+        // If the product wasn't found, return an error.
+        return error("Product not found");
+    }
+
+    // gRPC method to add a product to a user's cart.
+    remote function addToCart(Cart cart) returns CartResponse|error {
+        // Add the cart entry to the carts_table using the user's ID as the key.
+        carts_table.add({user_id: cart.user_id, cart: cart});
+        // Return a response containing the user ID to confirm the product was added to the cart.
+        return {user_id: cart.user_id};
+    }
+
+    // gRPC method to place an order based on the items in the user's cart.
+    remote function placeOrder(placeOrderRequest request) returns OrderResponse|error {
+        // Order processing logic would go here (e.g., checking inventory, processing payment, etc.).
+        // Return a response indicating that the order was placed successfully, with the user ID.
+        return {user_id: request.user_id};
+    }
+
+    // gRPC method to create multiple users from a stream of User objects.
+    // This method handles a stream of incoming user data and processes it.
+    remote function createUsers(stream<User, grpc:Error?> clientStream) returns UserCreationResponse|error {
+        // Initialize an empty list to hold the user objects.
+        User[] users = [];
+        // Iterate over each user in the stream and add them to the users_table.
+        check clientStream.forEach(function(User user) {
+            users_table.add({id: user.id, user: user});  // Add each user to the table.
+            users.push(user);  // Add each user to the local users list.
+        });
+        // Return a response with the list of users created.
+        return {users: users};
+    }
+
+    // gRPC method to list all available products (products that are in stock).
+    // This returns a stream of Product objects that are currently available.
+    remote function listAvailableProducts() returns stream<Product, error?>|error {
+        // Create a stream from the products_table, filtering only products with the status "Available".
+        stream<Product, error?> productStream = stream from var entry in products_table.toArray()
+                                                where entry.product.status == "Available"
+                                                select entry.product;
+        // Return the stream of available products.
+        return productStream;
+    }
+}
