@@ -3,37 +3,37 @@ import ballerina/http;
 
 // Define a record to store information about a course
 type Course record {
-    string course_name; // Course name
-    string course_code; // Unique course code
-    int nqf_level; // NQF level of the course
-    string[] fun_facts; // Fun facts related to the course
+    string course_name; 
+    string course_code; 
+    int nqf_level; 
+    string[] fun_facts; 
 };
 
 // Define a record to store information about a programme
 type Programme record {| 
-    readonly string code; // Unique programme code
-    string faculty; // Faculty associated with the programme
-    string qualification_title; // Title of the qualification
+    readonly string code; 
+    string faculty; 
+    string qualification_title;
     int nqf_level;
-    string registration_date; // Date when the programme was registered
-    int reg_year; // The year the programme is registered
-    Course[] courses; // List of courses in the programme
-    string mascot; // Mascot for the programme
+    string registration_date;
+    int reg_year;
+    Course[] courses; 
+    string mascot;
 |};
 
 // Placeholder variables for student information
-string student_name = "<Your Name>"; // Student's name
-string student_number = "<Your Student Number>"; // Student's number
+string student_name = "<Your Name>"; 
+string student_number = "<Your Student Number>"; 
 
 // Description of the system that will be displayed to users
 string[] system_description = [
-    "Welcome to the Fun Programme Management System!", // Introduction message
-    "This system allows you to manage university programmes and courses.", // System capabilities
-    "You can add, view, update, and delete programmes.", // Feature set
-    "Each programme has a unique code, faculty, qualification title, and mascot.", // Programme details
-    "Courses within programmes have names, codes, NQF levels, and fun facts.", // Course details
-    "Enjoy managing your academic world with a touch of fun!", // Fun message
-    "Don't forget to rate your experience after each operation!" // Feedback prompt
+    "Welcome to the Fun Programme Management System!", 
+    "This system allows you to manage university programmes and courses.", 
+    "You can add, view, update, and delete programmes.", 
+    "Each programme has a unique code, faculty, qualification title, and mascot.", 
+    "Courses within programmes have names, codes, NQF levels, and fun facts.", 
+    "Enjoy managing your academic world with a touch of fun!", 
+    "Don't forget to rate your experience after each operation!" 
 ];
 
 // Main function to manage the programme operations
@@ -67,7 +67,7 @@ public function main() returns error? {
         io:println("9. Exit");
 
         // Get the user's choice
-        string choice = io:readln("Enter your choice (1-6): ");
+        string choice = io:readln("Enter your choice (1-9): ");
 
         // Handle the user's choice using match
         match choice {
@@ -89,9 +89,9 @@ public function main() returns error? {
                     qualification_title: io:readln("Enter qualification title: "),
                      nqf_level: check int:fromString(io:readln("Enter NQF Level: ")), 
                     registration_date: io:readln("Enter registration date: "),
-                    courses: [], // Initialize an empty course array
+                    courses: [], 
                     mascot: io:readln("Enter programme mascot: "),
-                    reg_year: year_int // Assign the year input to due_year
+                    reg_year: year_int 
                 };
                 // Send the new programme to the server and print the response
                 string result = check programmeClient->/add_new_programme.post(newProg);

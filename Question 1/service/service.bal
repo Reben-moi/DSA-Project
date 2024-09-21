@@ -39,17 +39,17 @@ function getRandomIndex(int max) returns int {
 service /programmeManagament on new http:Listener(7500) {
 
     resource function get all() returns Programme[] {
-        io:println("🎉 Fetching all programmes! It's a knowledge party!");
+        io:println("🎉 Fetching all programmes!");
         return programme_table.toArray();
     }
 
     resource function get getByCode/[string code]() returns Programme|string {
         Programme? programme = programme_table.get(code);
         if programme is Programme {
-            io:println("🔍 Found the programme! It's like finding a needle in a haystack, but easier!");
+            io:println("🔍 Found the programme you requested!");
             return programme;
         }
-        return "😢 Oops! This programme is playing hide and seek. We couldn't find it!";
+        return "😢 We're finding it very hard to locate the program, try again later!";
     }
 
     resource function get getByfaculty/[string faculty]() returns Programme[] {
@@ -75,7 +75,7 @@ service /programmeManagament on new http:Listener(7500) {
             io:println("💅 " + response);
             return response;
         }
-        return "😱 Oh no! This programme is playing hide and seek. We couldn't find it to give it a makeover!";
+        return "😢 We're finding it very hard to locate the program, try again later!";
     }
 
     resource function get getDueYear() returns Programme[] {
@@ -99,7 +99,7 @@ service /programmeManagament on new http:Listener(7500) {
             io:println("🔮 " + response);
             return response;
         }
-        return "🕵️ Hmm... We couldn't find this programme. Maybe it already escaped?";
+        return "🕵️ Hmm... We couldn't find this programme.";
     }
 
     resource function get random_fun_fact/[string code]() returns string {
@@ -116,6 +116,6 @@ service /programmeManagament on new http:Listener(7500) {
             }
             return "📚 This programme is shy and doesn't have any courses to share fun facts about!";
         }
-        return "🕵️ Programme not found. It's playing hide and seek!";
+        return "🕵️ Programme not found.";
     }
 }
