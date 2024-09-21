@@ -2,6 +2,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/time;
  
+// Define the Programme record type 
 type Programme record {
    readonly string programmeCode;
     string nqfLevel;
@@ -12,14 +13,17 @@ type Programme record {
     Course[] courses;
 };
 
+// Define the Course record type
 type Course record {
     string courseCode;
     string courseName;
     string nqfLevel;
 };
 
+// Initialize the programme table with a key on programmeCode
 table<Programme> key(programmeCode) programmeTable = table [];
 
+// Define the HTTP service
 service /programmes on new http:Listener(8080) {
 resource function post addProgramme(@http:Payload Programme programme) returns string {
     io:println(programme);
@@ -29,6 +33,8 @@ resource function post addProgramme(@http:Payload Programme programme) returns s
         }
         return string `${programme.programmeCode} saved successfully`;
     }
+
+// Resource to get all programmes    
 resource function get getAllProgrammes() returns Programme[] {
     Programme[] allProgrammes = [];
 
@@ -55,6 +61,7 @@ resource function get getAllProgrammes() returns Programme[] {
         return string `${programme.programmeCode} saved successfully`;
     }
 
+// Resource to get a programme by its faculty
     resource function get getProgrammeByFaculty(string faculty) returns Programme|error {
         foreach Programme programme in programmeTable {
             if (programme.faculty === faculty) {
@@ -64,6 +71,7 @@ resource function get getAllProgrammes() returns Programme[] {
         return error("Programme not found in faculty: " + faculty);
     }
 
+// Resource to delete a programme by its code
 resource function delete deleteProgrammeByCode(string programmeCode) returns string {
         table<Programme> tempProgrammeTable = table [];
         boolean programmeFound = false;
@@ -85,6 +93,7 @@ resource function delete deleteProgrammeByCode(string programmeCode) returns str
     }
 
 
+// Resource to get all programmes in the same faculty
 resource function get getProgrammeBySameFaculty(string faculty) returns Programme[]|error {
     Programme[] facultyProgrammes = [];
 
