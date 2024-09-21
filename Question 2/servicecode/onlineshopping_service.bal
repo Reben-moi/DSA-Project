@@ -1,37 +1,37 @@
 import ballerina/grpc;
 
-  //.. Create a gRPC listener on port 9090. This will listen for incoming gRPC requests.
+  // Create a gRPC listener on port 9090. This will listen for incoming gRPC requests.
 listener grpc:Listener ep = new (9090);
 
- //.. Define the record to represent a product entry with an SKU (Stock Keeping Unit) as the unique identifier.
+ // Define the record to represent a product entry with an SKU (Stock Keeping Unit) as the unique identifier.
 type ProductEntry record {|
     readonly string sku; // SKU is read-only to ensure immutability.
     Product product;     // The product itself contains details like name, price, description, etc.
 |};
 
- //.. Define the record to represent a cart entry with a user ID as the unique identifier.
+ // Define the record to represent a cart entry with a user ID as the unique identifier.
 type CartEntry record {|
     readonly string user_id; // Unique identifier for the user.
     Cart cart;               // Cart object containing items added by the user.
 |};
 
- //.. Define the record to represent a user entry with an ID as the unique identifier.
+ // Define the record to represent a user entry with an ID as the unique identifier.
 type UserEntry record {|
     readonly string id;  // Unique identifier for the user.
     User user;           // User object containing user details such as name, role, etc.
 |};
 
- //.. Bellow we create tables to store product, cart, and user entries, with their respective unique keys.
- //.. Each table is essentially an in-memory database for our online shopping system.
+ // Bellow we create tables to store product, cart, and user entries, with their respective unique keys.
+ // Each table is essentially an in-memory database for our online shopping system.
 table<ProductEntry> key(sku) products_table = table [];  // Table to store products, keyed by SKU.
 table<CartEntry> key(user_id) carts_table = table [];    // Table to store carts, keyed by user ID.
 table<UserEntry> key(id) users_table = table [];         // Table to store users, keyed by user ID.
 
 @grpc:Descriptor {value: ONLINE_SHOPPING_DESC}
- //.. Define the gRPC service named "onlineShopping" that listens for gRPC calls.
+ // Define the gRPC service named "onlineShopping" that listens for gRPC calls.
 service "onlineShopping" on ep {
 
-     //.. This is the gRPC method to add a new product to the products_table.
+     // This is the gRPC method to add a new product to the products_table.
     remote function addProduct(Product product) returns ProductResponse|error {
          //.. Add the product to the table using its SKU as the key.
      products_table.add({sku: product.sku, product: product});
