@@ -30,6 +30,7 @@ string[] system_description = [
     "Enjoy managing your academic world with a touch of fun!",
     "Don't forget to rate your experience after each operation!"
 ];
+
 function displayStars(int rating) returns string {
     string stars = "";
     foreach int i in 1...5 {
@@ -59,3 +60,67 @@ public function main() returns error? {
         io:println("6. Exit");
 
         string choice = io:readln("Enter your choice (1-6): ");
+
+        match choice {
+            "1" => {
+                Programme[] programmes = check programmeClient->/all();
+                io:println("\n📚 All Programmes:");
+                foreach var prog in programmes {
+                    io:println(string ${prog.code}: ${prog.qualification_title} (${prog.faculty}) (${prog.nqf_level}) - Mascot: ${prog.mascot});
+                }
+            }
+            "2" => {
+                Programme newProg = {
+                    code: io:readln("Enter programme code: "),
+                    faculty: io:readln("Enter faculty: "),
+                    nqf_level: check int:fromString(io:readln("Enter NQF Level: ")), // NQF level as integer
+                    qualification_title: io:readln("Enter qualification title: "),
+                    registration_date: io:readln("Enter registration date: "),
+                    courses: [],
+                    mascot: io:readln("Enter programme mascot: ")
+                };
+                string result = check programmeClient->/add_new_programme.post(newProg);
+                io:println(result);
+            }
+            "3" => {
+                string code = io:readln("Enter programme code to update: ");
+                Programme updateProg = {
+                    code: code,
+                    faculty: io:readln("Enter new faculty: "),
+                    qualification_title: io:readln("Enter new qualification title: "),
+                    nqf_level: check int:fromString(io:readln("Enter NQF Level: ")), // NQF level as integer
+                    registration_date: io:readln("Enter new registration date: "),
+                    courses: [],
+                    mascot: io:readln("Enter new programme mascot: ")
+                };
+                string result = check programmeClient->/update_programme/[code].put(updateProg);
+                io:println(result);
+            }
+
+            "4" => {
+                string code = io:readln("Enter programme code to delete: ");
+                string result = check programmeClient->/delete_programme/[code].delete();
+                io:println(result);
+            }
+            "5" => {
+                string code = io:readln("Enter programme code for a random fun fact: ");
+                string result = check programmeClient->/random_fun_fact/[code];
+                io:println(result);
+            }
+            "6" => {
+                io:println("👋 Thanks for using the Fun Programme Management System! Have a great day!");
+                return;
+            }
+            _ => {
+                io:println("❌ Invalid choice. Please try again.");
+            }
+        }
+
+        // Star rating after each operation
+        if choice != "6" {
+            int rating = check int:fromString(io:readln("\nRate your experience (1-5 stars): "));
+            io:println("Your rating: " + displayStars(rating));
+            io:println("Thank you for your feedback!");
+        }
+    }
+}
