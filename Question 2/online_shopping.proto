@@ -3,6 +3,7 @@ package OnlineShopping;
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 
+// RPC methods to managing products, users, carts, and orders
 service onlineShopping {
     rpc addProduct (Product) returns (ProductResponse);
     rpc updateProduct (Product) returns (ProductResponse);
@@ -14,6 +15,7 @@ service onlineShopping {
     rpc createUsers (stream User) returns (UserCreationResponse);
 }
 
+//product info
 message Product {
     string name = 1;
     string description = 2;
@@ -22,6 +24,8 @@ message Product {
     string sku = 5;
     string status = 6;
 }
+
+//requests and responses
 
 message ProductResponse {
     string message = 1;
