@@ -23,11 +23,11 @@ public function main() returns error? {
     http:Client programmeClient = check new ("localhost:8080/programmes");
 
     io:println("1. Add Programme");
-    io:println("2. Retrieve a list of All Programme within Programme Development Unit");
+    io:println("2. Retrieve a list of all Programmes within Programme Development Unit");
     io:println("3. Update an exist if Programme By Programme Code");
     io:println("4. View Specific Programme by programme code");
     io:println("5. Delete Programme By Programme Code");
-    io:println("6. Retrieve all Programmme Due For Review");
+    io:println("6. Retrieve all Programmmes Due For Review");
     io:println("7. Retrieve Programmes From Same Faculty");
     string option = io:readln("Choose an option: ");
 
