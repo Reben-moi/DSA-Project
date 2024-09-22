@@ -53,7 +53,7 @@ service /programmeManagament on new http:Listener(7500) {
     }
 
     resource function get getByfaculty/[string faculty]() returns Programme[] {
-        io:println("🏫 Searching for programmes in the " + faculty + " faculty. It's like a treasure hunt!");
+        io:println("🏫 Searching for programmes in the " + faculty + " faculty. ");
         Programme[] result = from Programme programme in programme_table
                              where programme.faculty == faculty
                              select programme;
@@ -63,7 +63,7 @@ service /programmeManagament on new http:Listener(7500) {
     resource function post add_new_programme(Programme programme) returns string {
         programme_table.add(programme);
         string response = fun_phrases[getRandomIndex(fun_phrases.length())] + 
-                          "The programme '" + programme.qualification_title + "' has joined the party!";
+                          "The programme '" + programme.qualification_title + "' has been registered successfully";
         io:println("🎊 " + response);
         return response;
     }
@@ -71,7 +71,7 @@ service /programmeManagament on new http:Listener(7500) {
     resource function put update_programme/[string code](Programme programme) returns string {
         if (programme_table.hasKey(code)) {
             programme_table.put(programme);
-            string response = "The programme got a makeover! It's now looking fabulous!";
+            string response = "The programme has been updated successfully!";
             io:println("💅 " + response);
             return response;
         }
@@ -95,7 +95,7 @@ service /programmeManagament on new http:Listener(7500) {
     resource function delete delete_programme/[string code]() returns string {
         if (programme_table.hasKey(code)) {
             Programme result = programme_table.remove(code);
-            string response = "Poof! The programme '" + result.qualification_title + "' has vanished into thin air!";
+            string response = "The programme '" + result.qualification_title + "' has been deleted";
             io:println("🔮 " + response);
             return response;
         }
