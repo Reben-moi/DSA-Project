@@ -17,7 +17,7 @@ type Programme record {|
     string registration_date;
     int reg_year;
     Course[] courses;
-    string mascot = "";
+    string description = "";
 |};
 
 table<Programme> key(code) programme_table = table [];

@@ -18,7 +18,7 @@ type Programme record {|
     string registration_date;
     int reg_year;
     Course[] courses; 
-    string mascot;
+    string description;
 |};
 
 // Placeholder variables for student information
@@ -30,7 +30,7 @@ string[] system_description = [
     "Welcome to the Fun Programme Management System!", 
     "This system allows you to manage university programmes and courses.", 
     "You can add, view, update, and delete programmes.", 
-    "Each programme has a unique code, faculty, qualification title, and mascot.", 
+    "Each programme has a unique code, faculty, qualification title, and description.", 
     "Courses within programmes have names, codes, NQF levels, and fun facts.", 
     "Enjoy managing your academic world with a touch of fun!", 
     "Don't forget to rate your experience after each operation!" 
@@ -76,7 +76,7 @@ public function main() returns error? {
                 Programme[] programmes = check programmeClient->/all();
                 io:println("\n📚 All Programmes:");
                 foreach var prog in programmes {
-                    io:println(string `${prog.code}: ${prog.qualification_title} (${prog.faculty}) (${prog.nqf_level}) - Mascot: ${prog.mascot}`);
+                    io:println(string `${prog.code}: ${prog.qualification_title} (${prog.faculty}) (${prog.nqf_level}) - Mascot: ${prog.description}`);
                 }
             }
             "2" => {
@@ -90,7 +90,7 @@ public function main() returns error? {
                      nqf_level: check int:fromString(io:readln("Enter NQF Level: ")), 
                     registration_date: io:readln("Enter registration date: "),
                     courses: [], 
-                    mascot: io:readln("Enter programme mascot: "),
+                    description: io:readln("Enter programme description: "),
                     reg_year: year_int 
                 };
                 // Send the new programme to the server and print the response
@@ -109,7 +109,7 @@ public function main() returns error? {
                      nqf_level: check int:fromString(io:readln("Enter NQF Level: ")), 
                     registration_date: io:readln("Enter new registration date: "),
                     courses: [], // Initialize an empty course array
-                    mascot: io:readln("Enter new programme mascot: "),
+                    description: io:readln("Enter new programme description: "),
                     reg_year: year_int // Assign the updated year
                 };
                 // Send the updated programme to the server and print the response
@@ -133,7 +133,7 @@ public function main() returns error? {
                 io:println("Qualification Title: ", programmes.qualification_title);
                 io:println("Faculty: ", programmes.faculty);
                 io:println("Registration Date: ", programmes.registration_date);
-                io:println("Mascot: ", programmes.mascot);
+                io:println("Mascot: ", programmes.description);
                 io:println("Registration Year: ", programmes.reg_year);
             }
             "6" => {
@@ -142,7 +142,7 @@ public function main() returns error? {
                 Programme[] programmes = check programmeClient->/getByfaculty/[faculty]();
                 io:println("\n📚 Programme:");
                 foreach var prog in programmes {
-                    io:println(string `${prog.code}: ${prog.qualification_title} (${prog.faculty}) ${prog.registration_date}- Mascot: ${prog.mascot}`);
+                    io:println(string `${prog.code}: ${prog.qualification_title} (${prog.faculty}) ${prog.registration_date}- Mascot: ${prog.description}`);
                 }
             }
             "7" => {
@@ -150,7 +150,7 @@ public function main() returns error? {
                 Programme[] programmes = check programmeClient->/getDueYear();
                 io:println("\n📚 Programme that are due:");
                 foreach var prog in programmes {
-                    io:println(string `${prog.code}: ${prog.qualification_title} (${prog.faculty}) ${prog.registration_date}- Mascot: ${prog.mascot}`);
+                    io:println(string `${prog.code}: ${prog.qualification_title} (${prog.faculty}) ${prog.registration_date}- Mascot: ${prog.description}`);
                 }
             }
             "8" => {
